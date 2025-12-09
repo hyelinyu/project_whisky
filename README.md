@@ -42,4 +42,4 @@ original source according to their Terms & Conditions.
 결과를 재현하고자 하는 경우, 해당 웹사이트의 이용 약관에 따라
 원본 데이터를 직접 수집하여 사용하시기 바랍니다.
 ```
-dataset resource : <a href="[https://www.thewhiskyexchange.com/](https://www.thewhiskyexchange.com/)" target="_blank">The Whisky Exchange</a>
+dataset resource : <a href="https://www.thewhiskyexchange.com/">The Whisky Exchange</a>
