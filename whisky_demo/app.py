@@ -15,7 +15,7 @@ recommender = WhiskyRecommender(df)
 # 공통: 응답에 포함할 컬럼
 BASIC_COLS = [
     "name", "country", "region", "whisky_type",
-    "price(£)", "abv",
+    "price(£)", "alcohol(%)",
     "style_body", "style_richness", "style_smoke", "style_sweetness"
 ]
 
