@@ -420,18 +420,49 @@
     let currentSample = [];
     let productList = []; // 제품 이름 리스트 (0~5개)
 
+
+
+// 🔧 더 안전한 버전
     async function refreshSampleFromApi() {
       try {
         const res = await fetch("/api/whiskies/sample?n=9");
+    
         if (!res.ok) {
-          throw new Error("샘플 API 에러");
+          // HTTP 에러 (500, 404 등)
+          throw new Error("샘플 API 에러: " + res.status);
         }
-        const data = await res.json();
-        currentSample = data;
+    
+        // 서버에서 온 raw 텍스트를 한 번 찍어보기
+        const text = await res.text();
+        console.log("sample raw response:", text);
+    
+        let data;
+        try {
+          data = JSON.parse(text);
+        } catch (e) {
+          console.error("JSON 파싱 오류:", e);
+          alert("서버 응답을 JSON으로 읽지 못했어요.");
+          return;
+        }
+    
+        // 배열 형태인지, {recommendations: [...]} 형태인지 모두 대응
+        let items;
+        if (Array.isArray(data)) {
+          items = data;
+        } else if (Array.isArray(data.recommendations)) {
+          items = data.recommendations;
+        } else {
+          console.error("예상치 못한 샘플 데이터 형식:", data);
+          alert("서버에서 받은 샘플 데이터 형식이 예상과 달라요.");
+          return;
+        }
+    
+        currentSample = items;
         productList = [];
         renderSampleGrid();
+    
       } catch (err) {
-        console.error(err);
+        console.error("refreshSampleFromApi error:", err);
         alert("위스키 샘플을 불러오는 중 오류가 발생했어요.");
       }
     }
