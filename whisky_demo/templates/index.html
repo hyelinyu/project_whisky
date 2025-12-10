@@ -193,104 +193,103 @@
 
   <div class="layout-two">
     <!-- === 왼쪽: 취향 기반 추천 === -->
-<section class="section" id="taste-section">
-    <h2>1. 취향 기반 추천</h2>
-    <p class="hint">
-      각 축에서 가장 가까운 느낌을 골라주세요. (기본값 : medium-round-non-balanced)
-    </p>
-  
-    <!-- Body -->
-    <div>
-      <div class="field-label">Body</div>
-      <div class="hint">light / medium / full</div>
-      <div class="pill-group">
-        <div class="pill">
-          <input type="radio" id="body-light" name="body_cat" value="light">
-          <label for="body-light">light</label>
-        </div>
-        <div class="pill">
-          <input type="radio" id="body-medium" name="body_cat" value="medium" checked>
-          <label for="body-medium">medium</label>
-        </div>
-        <div class="pill">
-          <input type="radio" id="body-full" name="body_cat" value="full">
-          <label for="body-full">full</label>
-        </div>
-      </div>
-    </div>
-  
-    <!-- Richness -->
-    <div>
-      <div class="field-label">Richness</div>
-      <div class="hint">lean / round / rich</div>
-      <div class="pill-group">
-        <div class="pill">
-          <input type="radio" id="rich-lean" name="richness_cat" value="lean">
-          <label for="rich-lean">lean</label>
-        </div>
-        <div class="pill">
-          <input type="radio" id="rich-round" name="richness_cat" value="round" checked>
-          <label for="rich-round">round</label>
-        </div>
-        <div class="pill">
-          <input type="radio" id="rich-rich" name="richness_cat" value="rich">
-          <label for="rich-rich">rich</label>
+    <section class="section" id="taste-section">
+      <h2>1. 취향 기반 추천</h2>
+      <p class="hint">
+        각 축에서 가장 가까운 느낌을 골라주세요. (기본값 : medium-round-non-balanced)
+      </p>
+
+      <!-- Body -->
+      <div>
+        <div class="field-label">Body</div>
+        <div class="hint">light / medium / full</div>
+        <div class="pill-group">
+          <div class="pill">
+            <input type="radio" id="body-light" name="body_cat" value="light">
+            <label for="body-light">light</label>
+          </div>
+          <div class="pill">
+            <input type="radio" id="body-medium" name="body_cat" value="medium" checked>
+            <label for="body-medium">medium</label>
+          </div>
+          <div class="pill">
+            <input type="radio" id="body-full" name="body_cat" value="full">
+            <label for="body-full">full</label>
+          </div>
         </div>
       </div>
-    </div>
-  
-    <!-- Smoke -->
-    <div>
-      <div class="field-label">Smoke</div>
-      <div class="hint">non / light-smoky / smoky</div>
-      <div class="pill-group">
-        <div class="pill">
-          <input type="radio" id="smoke-non" name="smoke_cat" value="non" checked>
-          <label for="smoke-non">non</label>
-        </div>
-        <div class="pill">
-          <!-- ✅ value 를 light-smoky 로 수정 -->
-          <input type="radio" id="smoke-light" name="smoke_cat" value="light-smoky">
-          <label for="smoke-light">light-smoky</label>
-        </div>
-        <div class="pill">
-          <input type="radio" id="smoke-smoky" name="smoke_cat" value="smoky">
-          <label for="smoke-smoky">smoky</label>
-        </div>
-      </div>
-    </div>
-  
-    <!-- Sweetness -->
-    <div>
-      <div class="field-label">Sweetness</div>
-      <div class="hint">dry / balanced / sweet</div>
-      <div class="pill-group">
-        <div class="pill">
-          <input type="radio" id="sweet-dry" name="sweetness_cat" value="dry">
-          <label for="sweet-dry">dry</label>
-        </div>
-        <div class="pill">
-          <input type="radio" id="sweet-balanced" name="sweetness_cat" value="balanced" checked>
-          <label for="sweet-balanced">balanced</label>
-        </div>
-        <div class="pill">
-          <input type="radio" id="sweet-sweet" name="sweetness_cat" value="sweet">
-          <label for="sweet-sweet">sweet</label>
+
+      <!-- Richness -->
+      <div>
+        <div class="field-label">Richness</div>
+        <div class="hint">lean / round / rich</div>
+        <div class="pill-group">
+          <div class="pill">
+            <input type="radio" id="rich-lean" name="richness_cat" value="lean">
+            <label for="rich-lean">lean</label>
+          </div>
+          <div class="pill">
+            <input type="radio" id="rich-round" name="richness_cat" value="round" checked>
+            <label for="rich-round">round</label>
+          </div>
+          <div class="pill">
+            <input type="radio" id="rich-rich" name="richness_cat" value="rich">
+            <label for="rich-rich">rich</label>
+          </div>
         </div>
       </div>
-    </div>
-  
-    <div class="btn-row">
-      <button class="btn btn-primary" id="btn-taste-recommend">
-        취향에 맞는 위스키 추천 받기 (Top 5)
-      </button>
-    </div>
-  
-    <div id="taste-results" class="grid"></div>
-    <p id="taste-no-results" class="no-result" style="display:none;">
-      조건에 맞는 위스키를 찾지 못했어요.
-    </p>
-  </section>
+
+      <!-- Smoke -->
+      <div>
+        <div class="field-label">Smoke</div>
+        <div class="hint">non / light-smoky / smoky</div>
+        <div class="pill-group">
+          <div class="pill">
+            <input type="radio" id="smoke-non" name="smoke_cat" value="non" checked>
+            <label for="smoke-non">non</label>
+          </div>
+          <div class="pill">
+            <input type="radio" id="smoke-light" name="smoke_cat" value="light-smoky">
+            <label for="smoke-light">light-smoky</label>
+          </div>
+          <div class="pill">
+            <input type="radio" id="smoke-smoky" name="smoke_cat" value="smoky">
+            <label for="smoke-smoky">smoky</label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sweetness -->
+      <div>
+        <div class="field-label">Sweetness</div>
+        <div class="hint">dry / balanced / sweet</div>
+        <div class="pill-group">
+          <div class="pill">
+            <input type="radio" id="sweet-dry" name="sweetness_cat" value="dry">
+            <label for="sweet-dry">dry</label>
+          </div>
+          <div class="pill">
+            <input type="radio" id="sweet-balanced" name="sweetness_cat" value="balanced" checked>
+            <label for="sweet-balanced">balanced</label>
+          </div>
+          <div class="pill">
+            <input type="radio" id="sweet-sweet" name="sweetness_cat" value="sweet">
+            <label for="sweet-sweet">sweet</label>
+          </div>
+        </div>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn btn-primary" id="btn-taste-recommend">
+          취향에 맞는 위스키 추천 받기 (Top 5)
+        </button>
+      </div>
+
+      <div id="taste-results" class="grid"></div>
+      <p id="taste-no-results" class="no-result" style="display:none;">
+        조건에 맞는 위스키를 찾지 못했어요.
+      </p>
+    </section>
 
     <!-- === 오른쪽: 제품 기반 추천 === -->
     <section class="section" id="product-section">
@@ -329,54 +328,55 @@
   <script>
     // === 0) 공통: DOM에서 선택값 읽는 함수 ===========================
     function getSelectedRadio(name) {
-      const el = document.querySelector(`input[name="${name}"]:checked`);
+      const el = document.querySelector('input[name="' + name + '"]:checked');
       return el ? el.value : null;
     }
-  
+
     // 카드 렌더링 공통 함수 (응답 JSON → 카드)
     function renderCardsFromApi(items, containerId) {
       const container = document.getElementById(containerId);
       container.innerHTML = "";
-  
-      items.forEach(item => {
+
+      items.forEach(function (item) {
         const card = document.createElement("div");
         card.className = "card";
-  
-        const price = item["price(£)"] ?? item["price"] ?? null;
-        const abv = item["abv"];
+
+        const price = item["price(£)"] != null ? item["price(£)"] : item["price"];
+        const abv = item["alcohol(%)"];  // 🔸 컬럼명 변경 반영
         const flavour = [
           item["style_body"],
           item["style_richness"],
           item["style_smoke"],
           item["style_sweetness"],
         ].filter(Boolean).join(" · ");
-        
-        const priceText = price ? "약 £" + Number(price).toFixed(0) : "";
-  
+
+        const priceText = price != null ? "약 £" + Number(price).toFixed(0) : "";
+        const abvText = abv != null ? " · " + abv + "% ABV" : "";
+
         card.innerHTML =
-        `<div class="card-title">${item.name}</div>` +
-        `<div class="meta">` +
-        `${item.country || ""} · ${item.region || ""}` +
-        (abv ? ` · ${abv}% ABV` : "") +
-        `<br>${priceText}` +
-        `</div>` +
-        `<div class="small">` +
-        (flavour ? `Body/Rich/Smoke/Sweet: ${flavour}` : "") +
-        `</div>`;
-  
+          '<div class="card-title">' + item.name + '</div>' +
+          '<div class="meta">' +
+          (item.country || "") + " · " + (item.region || "") +
+          abvText +
+          "<br>" + priceText +
+          "</div>" +
+          '<div class="small">' +
+          (flavour ? "Body/Rich/Smoke/Sweet: " + flavour : "") +
+          "</div>";
+
         container.appendChild(card);
       });
     }
-  
+
     // ===============================================================
     // 1) 설문 기반 추천: /api/recommend/survey
     // ===============================================================
     async function recommendFromTasteApi() {
       const body = getSelectedRadio("body_cat") || "medium";
       const rich = getSelectedRadio("richness_cat") || "round";
-      const smoke = getSelectedRadio("smoke_cat") || "non";       // ✅ 여기서 "light-smoky" 그대로 넘어감
+      const smoke = getSelectedRadio("smoke_cat") || "non";
       const sweet = getSelectedRadio("sweetness_cat") || "balanced";
-  
+
       try {
         const res = await fetch("/api/recommend/survey", {
           method: "POST",
@@ -389,35 +389,34 @@
             selected_families: null
           })
         });
-  
+
         if (!res.ok) {
           throw new Error("설문 추천 API 에러");
         }
-  
+
         const data = await res.json();
         const recs = data.recommendations || [];
-  
+
         const noResultEl = document.getElementById("taste-no-results");
         if (!recs.length) {
           noResultEl.style.display = "block";
         } else {
           noResultEl.style.display = "none";
         }
-  
+
         renderCardsFromApi(recs, "taste-results");
-  
       } catch (err) {
         console.error(err);
         alert("설문 기반 추천 호출 중 오류가 발생했어요.");
       }
     }
-  
+
     // ===============================================================
     // 2) 제품 샘플 9개 불러오기: /api/whiskies/sample
     // ===============================================================
     let currentSample = [];
     let productList = []; // 제품 이름 리스트 (0~5개)
-  
+
     async function refreshSampleFromApi() {
       try {
         const res = await fetch("/api/whiskies/sample?n=9");
@@ -433,52 +432,52 @@
         alert("위스키 샘플을 불러오는 중 오류가 발생했어요.");
       }
     }
+
     function renderSampleGrid() {
-  const container = document.getElementById("product-sample");
-  container.innerHTML = "";
+      const container = document.getElementById("product-sample");
+      container.innerHTML = "";
 
-  currentSample.forEach((item) => {
-    const card = document.createElement("div");
-    card.className = "card card-clickable";
-    const isSelected = productList.includes(item.name);
-    if (isSelected) {
-      card.classList.add("selected");
-    }
-
-    const price = item["price(£)"] ?? item["price"] ?? null;
-    const priceText = price ? "약 £" + Number(price).toFixed(0) : "";
-    const abvText = item.abv ? " · " + item.abv + "% ABV" : "";
-
-    card.innerHTML =
-      `<div class="card-title">${item.name}</div>` +
-      `<div class="meta">` +
-      `${item.country || ""} · ${item.region || ""}<br>` +
-      `${priceText}${abvText}` +
-      `</div>`;
-
-    card.addEventListener("click", () => {
-      const name = item.name;
-      const idx = productList.indexOf(name);
-
-      if (idx >= 0) {
-        productList.splice(idx, 1);
-        card.classList.remove("selected");
-      } else {
-        if (productList.length >= 5) {
-          alert("최대 5개까지 선택할 수 있습니다.");
-          return;
+      currentSample.forEach(function (item) {
+        const card = document.createElement("div");
+        card.className = "card card-clickable";
+        const isSelected = productList.includes(item.name);
+        if (isSelected) {
+          card.classList.add("selected");
         }
-        productList.push(name);
-        card.classList.add("selected");
-      }
-    });
 
-    container.appendChild(card);
-  });
-  
-    
+        const price = item["price(£)"] != null ? item["price(£)"] : item["price"];
+        const priceText = price != null ? "약 £" + Number(price).toFixed(0) : "";
+        const abv = item["alcohol(%)"]; // 🔸 여기서도 alcohol(%) 사용
+        const abvText = abv != null ? " · " + abv + "% ABV" : "";
+
+        card.innerHTML =
+          '<div class="card-title">' + item.name + '</div>' +
+          '<div class="meta">' +
+          (item.country || "") + " · " + (item.region || "") + "<br>" +
+          priceText + abvText +
+          "</div>";
+
+        card.addEventListener("click", function () {
+          const name = item.name;
+          const idx = productList.indexOf(name);
+
+          if (idx >= 0) {
+            productList.splice(idx, 1);
+            card.classList.remove("selected");
+          } else {
+            if (productList.length >= 5) {
+              alert("최대 5개까지 선택할 수 있습니다.");
+              return;
+            }
+            productList.push(name);
+            card.classList.add("selected");
+          }
+        });
+
+        container.appendChild(card);
+      });
     }
-  
+
     // ===============================================================
     // 3) 제품 기반 추천: /api/recommend/products
     // ===============================================================
@@ -487,7 +486,7 @@
         alert("기준이 될 위스키를 최소 1개 이상 선택해 주세요. (최대 5개)");
         return;
       }
-  
+
       try {
         const res = await fetch("/api/recommend/products", {
           method: "POST",
@@ -496,41 +495,40 @@
             product_list: productList
           })
         });
-  
+
         if (!res.ok) {
           throw new Error("제품 기반 추천 API 에러");
         }
-  
+
         const data = await res.json();
         const recs = data.recommendations || [];
-  
+
         const noResultEl = document.getElementById("product-no-results");
         if (!recs.length) {
           noResultEl.style.display = "block";
         } else {
           noResultEl.style.display = "none";
         }
-  
+
         renderCardsFromApi(recs, "product-results");
-  
       } catch (err) {
         console.error(err);
         alert("제품 기반 추천 호출 중 오류가 발생했어요.");
       }
     }
-  
+
     // ===============================================================
     // 4) 버튼 연결 + 첫 샘플 호출
     // ===============================================================
     document.getElementById("btn-taste-recommend")
       .addEventListener("click", recommendFromTasteApi);
-  
+
     document.getElementById("btn-refresh-sample")
       .addEventListener("click", refreshSampleFromApi);
-  
+
     document.getElementById("btn-product-recommend")
       .addEventListener("click", recommendFromProductApi);
-  
+
     // 페이지 로드 시 샘플 호출
     refreshSampleFromApi();
   </script>
