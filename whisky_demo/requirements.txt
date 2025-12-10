@@ -1,0 +1,8 @@
+Flask==3.0.2
+flask-cors==4.0.0
+pandas
+numpy
+scikit-learn==1.5.2
+factor-analyzer==0.5.1
+pyarrow
+gunicorn
