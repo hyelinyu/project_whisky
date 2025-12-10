@@ -13,41 +13,18 @@
       padding: 24px 16px 40px;
       line-height: 1.5;
     }
-    h1 {
-      font-size: 28px;
-      margin-bottom: 8px;
-    }
-    h2 {
-      margin-top: 32px;
-      font-size: 20px;
-    }
-    h3 {
-      font-size: 16px;
-      margin-top: 20px;
-    }
-    .subtitle {
-      color: #555;
-      margin-bottom: 24px;
-    }
+    h1 { font-size: 28px; margin-bottom: 8px; }
+    h2 { font-size: 20px; margin-top: 32px; }
+    h3 { font-size: 16px; margin-top: 20px; }
+
+    .subtitle { color: #555; margin-bottom: 24px; }
     .section {
       margin-top: 24px;
       padding-top: 16px;
       border-top: 1px solid #eee;
     }
-    .pill-group {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-bottom: 12px;
-    }
-    .pill {
-      position: relative;
-    }
-    .pill input {
-      position: absolute;
-      opacity: 0;
-      pointer-events: none;
-    }
+    .pill-group { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+    .pill input { position: absolute; opacity: 0; pointer-events: none; }
     .pill label {
       display: inline-block;
       padding: 6px 12px;
@@ -56,7 +33,6 @@
       font-size: 13px;
       cursor: pointer;
       background: #fafafa;
-      user-select: none;
     }
     .pill input:checked + label {
       border-color: black;
@@ -64,516 +40,323 @@
       color: white;
       box-shadow: 0 2px 8px rgba(0,0,0,0.18);
     }
-    .field-label {
-      font-size: 14px;
-      font-weight: 600;
-      margin: 8px 0 4px;
-    }
-    .hint {
-      font-size: 12px;
-      color: #777;
-      margin-bottom: 8px;
-    }
-    .btn-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-top: 12px;
-      margin-bottom: 16px;
-    }
+
+    .btn-row { display: flex; gap: 8px; margin: 12px 0 16px; }
     .btn {
       padding: 8px 14px;
       border-radius: 999px;
       border: 1px solid transparent;
       cursor: pointer;
-      font-size: 14px;
-      font-weight: 500;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
+      font-size: 14px; font-weight: 500;
     }
-    .btn-primary {
-      background: black;
-      color: white;
-      box-shadow: 0 3px 10px rgba(0,0,0,0.12);
-    }
-    .btn-secondary {
-      background: white;
-      color: #222;
-      border-color: #ccc;
-    }
-    .btn:active {
-      transform: translateY(1px);
-      box-shadow: 0 1px 4px rgba(0,0,0,0.18);
-    }
+    .btn-primary { background: black; color: white; }
+    .btn-secondary { background: white; border-color: #ccc; }
+
     .grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 16px;
-      margin-top: 12px;
+      gap: 16px; margin-top: 12px;
     }
     .card {
       border-radius: 16px;
-      padding: 14px 14px 12px;
+      padding: 14px;
+      background: white;
       box-shadow: 0 2px 10px rgba(0,0,0,0.08);
-      background: #fff;
-      display: flex;
-      flex-direction: column;
-      height: 100%;
-      transition: transform 0.08s ease, box-shadow 0.08s ease, border 0.08s ease;
       border: 1px solid transparent;
+      transition: 0.1s ease;
     }
-    .card-clickable {
-      cursor: pointer;
-    }
-    .card-clickable:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 16px rgba(0,0,0,0.12);
-    }
-    .card.selected {
-      border-color: black;
-      box-shadow: 0 0 0 1px black, 0 4px 16px rgba(0,0,0,0.16);
-    }
-    .card-title {
-      font-weight: 600;
-      margin-bottom: 4px;
-      font-size: 15px;
-    }
-    .tagline {
-      font-size: 13px;
-      color: #666;
-      margin-bottom: 10px;
-    }
-    .meta {
-      font-size: 12px;
-      color: #444;
-      margin-bottom: 6px;
-    }
-    .small {
-      font-size: 12px;
-      color: #777;
-      margin-top: 4px;
-    }
-    .chips {
-      margin-top: auto;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 4px;
-    }
+    .card-clickable { cursor: pointer; }
+    .card.selected { border-color: black; }
+
+    .card-title { font-weight: 600; font-size: 15px; margin-bottom: 4px; }
+    .meta { font-size: 12px; color: #555; margin-bottom: 6px; }
+
+    .chips { margin-top: auto; display: flex; gap: 4px; flex-wrap: wrap; }
     .chip {
-      font-size: 11px;
       padding: 3px 8px;
-      border-radius: 999px;
+      font-size: 11px;
+      background: #f5f5f5;
       border: 1px solid rgba(0,0,0,0.12);
-      background: #fafafa;
+      border-radius: 999px;
+      color: #555;
     }
-    .no-result {
-      font-size: 13px;
-      color: #777;
-      margin-top: 8px;
-    }
-    .layout-two {
-      display: grid;
-      grid-template-columns: minmax(0, 1.1fr) minmax(0, 1.1fr);
-      gap: 32px;
-    }
-    @media (max-width: 800px) {
-      .layout-two {
-        grid-template-columns: 1fr;
-      }
-    }
-    .title-row {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
+
+    .title-row { display: flex; gap: 10px; align-items: center; }
   </style>
 </head>
 <body>
   <h1>위스키 취향 추천 데모</h1>
   <p class="subtitle">
     Body / Richness / Smoke / Sweetness 네 가지 축으로 취향을 선택하거나,<br>
-    실제 제품 여러 개를 골라 “이 위스키들랑 비슷한” 추천을 받을 수 있어요.
+    여러 제품을 골라 비슷한 추천을 받을 수 있어요.
   </p>
 
-  <div class="layout-two">
-    <!-- === 왼쪽: 취향 기반 입력 === -->
-    <section class="section" id="taste-section">
+  <div class="layout-two" style="display:grid; grid-template-columns:1fr 1fr; gap:32px;">
+    
+    <!-- ===================== 왼쪽: 취향 기반 ======================== -->
+    <section class="section">
       <h2>1. 취향 기반 입력</h2>
-      <p class="hint">
-        각 축에서 가장 가까운 느낌을 골라주세요. (기본값 : medium-round-non-balanced)
-      </p>
 
       <!-- Body -->
-      <div>
-        <div class="field-label">Body</div>
-        <div class="hint">light / medium / full</div>
-        <div class="pill-group">
-          <div class="pill">
-            <input type="radio" id="body-light" name="body_cat" value="light">
-            <label for="body-light">light</label>
-          </div>
-          <div class="pill">
-            <input type="radio" id="body-medium" name="body_cat" value="medium" checked>
-            <label for="body-medium">medium</label>
-          </div>
-          <div class="pill">
-            <input type="radio" id="body-full" name="body_cat" value="full">
-            <label for="body-full">full</label>
-          </div>
-        </div>
+      <div class="field-label">Body</div>
+      <div class="pill-group">
+        <label class="pill"><input type="radio" name="body_cat" value="light">light</label>
+        <label class="pill"><input type="radio" name="body_cat" value="medium" checked>medium</label>
+        <label class="pill"><input type="radio" name="body_cat" value="full">full</label>
       </div>
 
       <!-- Richness -->
-      <div>
-        <div class="field-label">Richness</div>
-        <div class="hint">lean / round / rich</div>
-        <div class="pill-group">
-          <div class="pill">
-            <input type="radio" id="rich-lean" name="richness_cat" value="lean">
-            <label for="rich-lean">lean</label>
-          </div>
-          <div class="pill">
-            <input type="radio" id="rich-round" name="richness_cat" value="round" checked>
-            <label for="rich-round">round</label>
-          </div>
-          <div class="pill">
-            <input type="radio" id="rich-rich" name="richness_cat" value="rich">
-            <label for="rich-rich">rich</label>
-          </div>
-        </div>
+      <div class="field-label">Richness</div>
+      <div class="pill-group">
+        <label class="pill"><input type="radio" name="richness_cat" value="lean">lean</label>
+        <label class="pill"><input type="radio" name="richness_cat" value="round" checked>round</label>
+        <label class="pill"><input type="radio" name="richness_cat" value="rich">rich</label>
       </div>
 
       <!-- Smoke -->
-      <div>
-        <div class="field-label">Smoke</div>
-        <div class="hint">non / light-smoky / smoky</div>
-        <div class="pill-group">
-          <div class="pill">
-            <input type="radio" id="smoke-non" name="smoke_cat" value="non" checked>
-            <label for="smoke-non">non</label>
-          </div>
-          <div class="pill">
-            <input type="radio" id="smoke-light" name="smoke_cat" value="light-smoky">
-            <label for="smoke-light">light-smoky</label>
-          </div>
-          <div class="pill">
-            <input type="radio" id="smoke-smoky" name="smoke_cat" value="smoky">
-            <label for="smoke-smoky">smoky</label>
-          </div>
-        </div>
+      <div class="field-label">Smoke</div>
+      <div class="pill-group">
+        <label class="pill"><input type="radio" name="smoke_cat" value="non" checked>non</label>
+        <label class="pill"><input type="radio" name="smoke_cat" value="light-smoky">light-smoky</label>
+        <label class="pill"><input type="radio" name="smoke_cat" value="smoky">smoky</label>
       </div>
 
       <!-- Sweetness -->
-      <div>
-        <div class="field-label">Sweetness</div>
-        <div class="hint">dry / balanced / sweet</div>
-        <div class="pill-group">
-          <div class="pill">
-            <input type="radio" id="sweet-dry" name="sweetness_cat" value="dry">
-            <label for="sweet-dry">dry</label>
-          </div>
-          <div class="pill">
-            <input type="radio" id="sweet-balanced" name="sweetness_cat" value="balanced" checked>
-            <label for="sweet-balanced">balanced</label>
-          </div>
-          <div class="pill">
-            <input type="radio" id="sweet-sweet" name="sweetness_cat" value="sweet">
-            <label for="sweet-sweet">sweet</label>
-          </div>
-        </div>
+      <div class="field-label">Sweetness</div>
+      <div class="pill-group">
+        <label class="pill"><input type="radio" name="sweetness_cat" value="dry">dry</label>
+        <label class="pill"><input type="radio" name="sweetness_cat" value="balanced" checked>balanced</label>
+        <label class="pill"><input type="radio" name="sweetness_cat" value="sweet">sweet</label>
       </div>
 
       <div id="taste-results" class="grid"></div>
-      <p id="taste-no-results" class="no-result" style="display:none;">
-        조건에 맞는 위스키를 찾지 못했어요.
+      <p id="taste-no-results" style="display:none; font-size:13px; color:#777;">
+        조건에 맞는 결과가 없어요.
       </p>
     </section>
 
-    <!-- === 오른쪽: 제품 선택 + 공통 버튼 === -->
-    <section class="section" id="product-section">
-      <h2>2. 제품 기반 입력 (선택)</h2>
-      <p class="hint">
-        아래에서 마음에 드는 위스키를 여러 개 고르면 (최대 5개),<br>
-        그 제품들의 평균 스타일과 비슷한 위스키를 함께 추천해 줄게요.
-      </p>
+    <!-- ===================== 오른쪽: 제품 기반 ======================== -->
+    <section class="section">
+      <h2>2. 제품 기반 입력</h2>
 
       <div class="btn-row">
-        <button class="btn btn-secondary" id="btn-refresh-sample">
-          다른 위스키 보기 (랜덤 9개)
-        </button>
+        <button class="btn btn-secondary" id="btn-refresh-sample">다른 위스키 보기 (랜덤 9개)</button>
       </div>
 
       <div id="product-sample" class="grid"></div>
-      <p class="small">
-        ※ 카드를 클릭해서 기준이 될 위스키를 선택해 주세요. (0개 ~ 최대 5개 선택 가능)<br>
-        ※ 선택하지 않으면, 왼쪽 “취향 입력” 기준으로만 추천이 나옵니다.
-      </p>
 
       <div class="title-row">
         <h3>추천 결과</h3>
-        <button class="btn btn-primary" id="btn-run-all">
-          추천 결과 보기 (Top 5)
-        </button>
+        <button class="btn btn-primary" id="btn-run-all">추천 결과 보기 (Top 5)</button>
+        <button class="btn btn-secondary" id="btn-next-page">다음 결과</button>
       </div>
 
       <div id="product-results" class="grid"></div>
-      <p id="product-no-results" class="no-result" style="display:none;">
-        제품 기반으로 추천할 위스키를 찾지 못했어요.
+      <p id="product-no-results" style="display:none; font-size:13px; color:#777;">
+        추천할 결과가 없어요.
       </p>
     </section>
   </div>
 
-  <p class="small" style="margin-top:24px;">
-    ※ 프로젝트에서는 약 1,083개 위스키 데이터를 사용하며, 이 데모는 프론트엔드용 간단한 예시입니다.
-  </p>
-
   <script>
-    // === 0) 공통: DOM에서 선택값 읽는 함수 ===========================
-    function getSelectedRadio(name) {
-      const el = document.querySelector('input[name="' + name + '"]:checked');
+    // =============== 공통 함수 ===============
+    function getRadio(name){
+      const el = document.querySelector(`input[name="${name}"]:checked`);
       return el ? el.value : null;
     }
 
-    // 카드 렌더링 공통 함수 (응답 JSON → 카드)
-    function renderCardsFromApi(items, containerId) {
-      const container = document.getElementById(containerId);
-      container.innerHTML = "";
+    const PAGE_SIZE = 5;
+    let tasteAll = [];
+    let tastePage = 0;
+    let productAll = [];
+    let productPage = 0;
+    let currentSample = [];
+    let productList = [];
 
-      items.forEach(function (item) {
+    // 카드 렌더링 (tag → chip)
+    function renderCardList(list, targetId){
+      const box = document.getElementById(targetId);
+      box.innerHTML = "";
+
+      list.forEach(item=>{
         const card = document.createElement("div");
         card.className = "card";
 
-        const price = item["price(£)"] != null ? item["price(£)"] : item["price"];
+        const price = item["price(£)"];
         const abv = item["alcohol(%)"];
-        const flavour = [
-          item["style_body"],
-          item["style_richness"],
-          item["style_smoke"],
-          item["style_sweetness"],
-        ].filter(Boolean).join(" · ");
 
-        const priceText = price != null ? "약 £" + Number(price).toFixed(0) : "";
-        const abvText = abv != null ? " · " + abv + "% ABV" : "";
+        const tags = [
+          item.body_tag,
+          item.richness_tag,
+          item.smoke_tag,
+          item.sweetness_tag
+        ].filter(Boolean);
 
-        card.innerHTML =
-          '<div class="card-title">' + item.name + '</div>' +
-          '<div class="meta">' +
-          (item.country || "") + " · " + (item.region || "") +
-          abvText +
-          "<br>" + priceText +
-          "</div>" +
-          '<div class="small">' +
-          (flavour ? "Body/Rich/Smoke/Sweet: " + flavour : "") +
-          "</div>";
+        let chipHtml = "";
+        if(tags.length){
+          chipHtml = `<div class="chips"><span class="chip">${tags.join(" - ")}</span></div>`;
+        }
 
-        container.appendChild(card);
+        card.innerHTML = `
+          <div class="card-title">${item.name}</div>
+          <div class="meta">
+            ${item.country || ""} · ${item.region || ""} · ${abv ?? ""}% ABV<br>
+            약 £${price ?? ""}
+          </div>
+          ${chipHtml}
+        `;
+        box.appendChild(card);
       });
     }
 
-    // ===============================================================
-    // 1) 설문 기반 추천: /api/recommend/survey
-    // ===============================================================
-    async function recommendFromTasteApi() {
-      const body = getSelectedRadio("body_cat") || "medium";
-      const rich = getSelectedRadio("richness_cat") || "round";
-      const smoke = getSelectedRadio("smoke_cat") || "non";
-      const sweet = getSelectedRadio("sweetness_cat") || "balanced";
-
-      try {
-        const res = await fetch("/api/recommend/survey", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            body_level: body,
-            rich_level: rich,
-            smoke_level: smoke,
-            sweet_level: sweet,
-            selected_families: null
-          })
-        });
-
-        if (!res.ok) {
-          throw new Error("설문 추천 API 에러");
-        }
-
-        const data = await res.json();
-        const recs = data.recommendations || [];
-
-        const noResultEl = document.getElementById("taste-no-results");
-        if (!recs.length) {
-          noResultEl.style.display = "block";
-        } else {
-          noResultEl.style.display = "none";
-        }
-
-        renderCardsFromApi(recs, "taste-results");
-      } catch (err) {
-        console.error(err);
-        alert("설문 기반 추천 호출 중 오류가 발생했어요.");
+    // 기본 추천 렌더링 (취향 기반)
+    function renderTastePage(){
+      const start = tastePage * PAGE_SIZE;
+      let items = tasteAll.slice(start, start + PAGE_SIZE);
+      if(!items.length){
+        tastePage = 0;
+        items = tasteAll.slice(0, PAGE_SIZE);
       }
+      renderCardList(items, "taste-results");
     }
 
-    // ===============================================================
-    // 2) 제품 샘플 9개 불러오기: /api/whiskies/sample
-    // ===============================================================
-    let currentSample = [];
-    let productList = []; // 제품 이름 리스트 (0~5개)
-
-
-
-// 🔧 더 안전한 버전
-    async function refreshSampleFromApi() {
-      try {
-        const res = await fetch("/api/whiskies/sample?n=9");
-    
-        if (!res.ok) {
-          // HTTP 에러 (500, 404 등)
-          throw new Error("샘플 API 에러: " + res.status);
-        }
-    
-        // 서버에서 온 raw 텍스트를 한 번 찍어보기
-        const text = await res.text();
-        console.log("sample raw response:", text);
-    
-        let data;
-        try {
-          data = JSON.parse(text);
-        } catch (e) {
-          console.error("JSON 파싱 오류:", e);
-          alert("서버 응답을 JSON으로 읽지 못했어요.");
-          return;
-        }
-    
-        // 배열 형태인지, {recommendations: [...]} 형태인지 모두 대응
-        let items;
-        if (Array.isArray(data)) {
-          items = data;
-        } else if (Array.isArray(data.recommendations)) {
-          items = data.recommendations;
-        } else {
-          console.error("예상치 못한 샘플 데이터 형식:", data);
-          alert("서버에서 받은 샘플 데이터 형식이 예상과 달라요.");
-          return;
-        }
-    
-        currentSample = items;
-        productList = [];
-        renderSampleGrid();
-    
-      } catch (err) {
-        console.error("refreshSampleFromApi error:", err);
-        alert("위스키 샘플을 불러오는 중 오류가 발생했어요.");
+    function renderProductPage(){
+      const start = productPage * PAGE_SIZE;
+      let items = productAll.slice(start, start + PAGE_SIZE);
+      if(!items.length){
+        productPage = 0;
+        items = productAll.slice(0, PAGE_SIZE);
       }
+      renderCardList(items, "product-results");
     }
 
-    function renderSampleGrid() {
-      const container = document.getElementById("product-sample");
-      container.innerHTML = "";
+    // 샘플 카드 렌더링
+    function renderSampleGrid(){
+      const box = document.getElementById("product-sample");
+      box.innerHTML = "";
 
-      currentSample.forEach(function (item) {
+      currentSample.forEach(item=>{
         const card = document.createElement("div");
         card.className = "card card-clickable";
-        const isSelected = productList.includes(item.name);
-        if (isSelected) {
+
+        if(productList.includes(item.name)){
           card.classList.add("selected");
         }
 
-        const price = item["price(£)"] != null ? item["price(£)"] : item["price"];
-        const priceText = price != null ? "약 £" + Number(price).toFixed(0) : "";
-        const abv = item["alcohol(%)"];
-        const abvText = abv != null ? " · " + abv + "% ABV" : "";
+        card.innerHTML = `
+          <div class="card-title">${item.name}</div>
+          <div class="meta">
+            ${item.country} · ${item.region}<br>
+            약 £${item["price(£)"] ?? ""} · ${item["alcohol(%)"] ?? ""}% ABV
+          </div>
+        `;
 
-        card.innerHTML =
-          '<div class="card-title">' + item.name + '</div>' +
-          '<div class="meta">' +
-          (item.country || "") + " · " + (item.region || "") + "<br>" +
-          priceText + abvText +
-          "</div>";
-
-        card.addEventListener("click", function () {
-          const name = item.name;
-          const idx = productList.indexOf(name);
-
-          if (idx >= 0) {
-            productList.splice(idx, 1);
+        card.onclick = ()=>{
+          const idx = productList.indexOf(item.name);
+          if(idx >= 0){
+            productList.splice(idx,1);
             card.classList.remove("selected");
           } else {
-            if (productList.length >= 5) {
-              alert("최대 5개까지 선택할 수 있습니다.");
-              return;
-            }
-            productList.push(name);
+            if(productList.length >= 5){ alert("최대 5개 선택 가능"); return; }
+            productList.push(item.name);
             card.classList.add("selected");
           }
-        });
+        };
 
-        container.appendChild(card);
+        box.appendChild(card);
       });
     }
 
-    // ===============================================================
-    // 3) 제품 기반 추천: /api/recommend/products
-    // ===============================================================
-    async function recommendFromProductApi(skipIfEmpty) {
-      if (productList.length === 0) {
-        // 버튼 하나로 돌릴 때는, 선택 안 했으면 조용히 스킵
-        if (skipIfEmpty) {
-          document.getElementById("product-no-results").style.display = "none";
-          document.getElementById("product-results").innerHTML = "";
-          return;
-        }
-        alert("기준이 될 위스키를 최소 1개 이상 선택해 주세요. (최대 5개)");
-        return;
-      }
+    // =============== JSON 오류 자동 복구 + 샘플 가져오기 ===============
+    async function refreshSampleFromApi(){
+      try{
+        const res = await fetch("/api/whiskies/sample?n=9");
+        let text = await res.text();
 
-      try {
-        const res = await fetch("/api/recommend/products", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            product_list: productList
+        text = text
+          .replace(/\bNaN\b/g,"null")
+          .replace(/\bInfinity\b/g,"null")
+          .replace(/\b-Infinity\b/g,"null");
+
+        const data = JSON.parse(text);
+        currentSample = Array.isArray(data) ? data : data.recommendations;
+
+        productList = [];
+        renderSampleGrid();
+
+      }catch(e){
+        console.error(e);
+        alert("샘플 데이터를 불러오지 못했어요.");
+      }
+    }
+
+    // =============== 취향 기반 추천 API ===============
+    async function recommendTaste(){
+      try{
+        const res = await fetch("/api/recommend/survey",{
+          method:"POST",
+          headers:{"Content-Type":"application/json"},
+          body:JSON.stringify({
+            body_level:getRadio("body_cat"),
+            rich_level:getRadio("richness_cat"),
+            smoke_level:getRadio("smoke_cat"),
+            sweet_level:getRadio("sweetness_cat")
           })
         });
 
-        if (!res.ok) {
-          throw new Error("제품 기반 추천 API 에러");
-        }
+        let text = await res.text();
+        text = text.replace(/\bNaN\b/g,"null");
+        const data = JSON.parse(text);
 
-        const data = await res.json();
-        const recs = data.recommendations || [];
+        tasteAll = data.recommendations || [];
+        tastePage = 0;
+        renderTastePage();
 
-        const noResultEl = document.getElementById("product-no-results");
-        if (!recs.length) {
-          noResultEl.style.display = "block";
-        } else {
-          noResultEl.style.display = "none";
-        }
-
-        renderCardsFromApi(recs, "product-results");
-      } catch (err) {
-        console.error(err);
-        alert("제품 기반 추천 호출 중 오류가 발생했어요.");
+      }catch(e){
+        console.error(e);
+        alert("취향 기반 추천 오류");
       }
     }
 
-    // ===============================================================
-    // 4) 공통 버튼: 둘 다 한 번에 실행
-    // ===============================================================
-    async function runUnifiedRecommend() {
-      // 1) 항상 취향 기반 추천
-      await recommendFromTasteApi();
-      // 2) 제품이 선택돼 있으면 제품 기반도 실행 (선택 없으면 조용히 스킵)
-      await recommendFromProductApi(true);
+    // =============== 제품 기반 추천 API ===============
+    async function recommendProduct(){
+      if(productList.length === 0) return;
+
+      try{
+        const res = await fetch("/api/recommend/products",{
+          method:"POST",
+          headers:{"Content-Type":"application/json"},
+          body:JSON.stringify({product_list:productList})
+        });
+
+        let text = await res.text();
+        text = text.replace(/\bNaN\b/g,"null");
+        const data = JSON.parse(text);
+
+        productAll = data.recommendations || [];
+        productPage = 0;
+        renderProductPage();
+
+      }catch(e){
+        console.error(e);
+        alert("제품 기반 추천 오류");
+      }
     }
 
-    document.getElementById("btn-refresh-sample")
-      .addEventListener("click", refreshSampleFromApi);
+    // =============== 공통 버튼 ===============
+    async function runAll(){
+      await recommendTaste();
+      await recommendProduct();
+    }
 
-    document.getElementById("btn-run-all")
-      .addEventListener("click", runUnifiedRecommend);
+    document.getElementById("btn-refresh-sample").onclick = refreshSampleFromApi;
+    document.getElementById("btn-run-all").onclick = runAll;
 
-    // 페이지 로드 시 샘플 호출
+    document.getElementById("btn-next-page").onclick = ()=>{
+      tastePage++; productPage++;
+      renderTastePage(); renderProductPage();
+    };
+
     refreshSampleFromApi();
   </script>
 </body>
