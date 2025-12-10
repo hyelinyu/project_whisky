@@ -121,18 +121,18 @@ def api_recommend_survey():
 def api_whisky_sample():
     try:
         n = int(request.args.get("n", 9))
-        n = min(max(n, 1), len(df))  # 1 이상, 전체 개수 이하
+        n = min(n, len(df))
         logger.info(f"Sample request: n={n}")
 
-        sample_df = df.sample(n, random_state=None)
-        sample_df = select_basic_cols(sample_df)
+        sample_raw = df.sample(n)
+        sample_df = select_basic_cols(sample_raw)
 
         logger.info(f"Returning {len(sample_df)} sample whiskies")
 
         return jsonify(sample_df.to_dict(orient="records"))
 
     except Exception as e:
-        logger.exception(f"Sample API error: {str(e)}")
+        logger.exception("Sample API error")
         return jsonify({"error": str(e)}), 500
 
 
