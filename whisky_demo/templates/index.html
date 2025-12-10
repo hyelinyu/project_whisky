@@ -350,19 +350,19 @@
           item["style_smoke"],
           item["style_sweetness"],
         ].filter(Boolean).join(" · ");
+        
+        const priceText = price ? "약 £" + Number(price).toFixed(0) : "";
   
-        card.innerHTML = `
-          <div class="card-title">${item.name}</div>
-          <div class="meta">
-            ${(item.country || "")} · ${(item.region || "")} ${
-              abv ? `· ${abv}% ABV` : ""
-            }<br>
-            ${price ? \`약 £\${Number(price).toFixed(0)}\` : ""}
-          </div>
-          <div class="small">
-            ${flavour ? `Body/Rich/Smoke/Sweet: ${flavour}` : ""}
-          </div>
-        `;
+        card.innerHTML =
+        `<div class="card-title">${item.name}</div>` +
+        `<div class="meta">` +
+        `${item.country || ""} · ${item.region || ""}` +
+        (abv ? ` · ${abv}% ABV` : "") +
+        `<br>${priceText}` +
+        `</div>` +
+        `<div class="small">` +
+        (flavour ? `Body/Rich/Smoke/Sweet: ${flavour}` : "") +
+        `</div>`;
   
         container.appendChild(card);
       });
@@ -433,50 +433,50 @@
         alert("위스키 샘플을 불러오는 중 오류가 발생했어요.");
       }
     }
-  
     function renderSampleGrid() {
-      const container = document.getElementById("product-sample");
-      container.innerHTML = "";
-  
-      currentSample.forEach(item => {
-        const card = document.createElement("div");
-        card.className = "card card-clickable";
-        const isSelected = productList.includes(item.name);
-        if (isSelected) {
-          card.classList.add("selected");
+  const container = document.getElementById("product-sample");
+  container.innerHTML = "";
+
+  currentSample.forEach((item) => {
+    const card = document.createElement("div");
+    card.className = "card card-clickable";
+    const isSelected = productList.includes(item.name);
+    if (isSelected) {
+      card.classList.add("selected");
+    }
+
+    const price = item["price(£)"] ?? item["price"] ?? null;
+    const priceText = price ? "약 £" + Number(price).toFixed(0) : "";
+    const abvText = item.abv ? " · " + item.abv + "% ABV" : "";
+
+    card.innerHTML =
+      `<div class="card-title">${item.name}</div>` +
+      `<div class="meta">` +
+      `${item.country || ""} · ${item.region || ""}<br>` +
+      `${priceText}${abvText}` +
+      `</div>`;
+
+    card.addEventListener("click", () => {
+      const name = item.name;
+      const idx = productList.indexOf(name);
+
+      if (idx >= 0) {
+        productList.splice(idx, 1);
+        card.classList.remove("selected");
+      } else {
+        if (productList.length >= 5) {
+          alert("최대 5개까지 선택할 수 있습니다.");
+          return;
         }
+        productList.push(name);
+        card.classList.add("selected");
+      }
+    });
+
+    container.appendChild(card);
+  });
   
-        const price = item["price(£)"] ?? item["price"] ?? null;
-  
-        card.innerHTML = `
-          <div class="card-title">${item.name}</div>
-          <div class="meta">
-            ${(item.country || "")} · ${(item.region || "")}<br>
-            ${price ? \`약 £\${Number(price).toFixed(0)}\` : ""} ${
-              item.abv ? \`· \${item.abv}% ABV\` : ""
-            }
-          </div>
-        `;
-  
-        card.addEventListener("click", () => {
-          const name = item.name;
-          const idx = productList.indexOf(name);
-  
-          if (idx >= 0) {
-            productList.splice(idx, 1);
-            card.classList.remove("selected");
-          } else {
-            if (productList.length >= 5) {
-              alert("최대 5개까지 선택할 수 있습니다.");
-              return;
-            }
-            productList.push(name);
-            card.classList.add("selected");
-          }
-        });
-  
-        container.appendChild(card);
-      });
+    
     }
   
     // ===============================================================
