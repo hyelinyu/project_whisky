@@ -422,7 +422,9 @@
 
     async function refreshSampleFromApi() {
       try {
-        const res = await fetch("/api/whiskies/sample?n=9");
+        const BASE_URL = "https://whisky-recommender-demo.onrender.com";
+
+        const res = await fetch(`${BASE_URL}/api/whiskies/sample?n=9`);
         if (!res.ok) {
           throw new Error("샘플 API 에러");
         }
