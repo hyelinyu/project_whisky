@@ -55,10 +55,20 @@ BASIC_COLS = [
 def select_basic_cols(df_like: pd.DataFrame) -> pd.DataFrame:
     """
     BASIC_COLS 중에서 실제로 df_like에 존재하는 컬럼만 선택해서 반환.
-    (어떤 컬럼이 없다고 해서 KeyError가 나지 않도록 방지)
     """
     cols = [c for c in BASIC_COLS if c in df_like.columns]
+    if not cols:
+        return df_like
     return df_like[cols]
+
+
+def df_to_records(df_like: pd.DataFrame):
+    """
+    JSON 응답용으로 NaN → None 으로 바꾸고 records 리스트로 변환.
+    (NaN 이 그대로 나가면 브라우저 JSON.parse 에서 에러가 나므로 반드시 필요)
+    """
+    df_clean = df_like.where(pd.notnull(df_like), None)
+    return df_clean.to_dict(orient="records")
 
 
 # ---------------------------------------------------------
@@ -66,7 +76,6 @@ def select_basic_cols(df_like: pd.DataFrame) -> pd.DataFrame:
 # ---------------------------------------------------------
 @app.route("/")
 def index():
-    # templates/index.html 이 있어야 합니다.
     return render_template("index.html")
 
 
@@ -95,22 +104,22 @@ def api_recommend_survey():
             top_k_meta=10,
         )
 
-        # taste_only_main 이 없으면 에러 방지
         if "taste_only_main" not in res:
             raise ValueError("recommend 결과에 'taste_only_main' 키가 없습니다.")
 
-        df_out = res["taste_only_main"].head(5)
-        df_out = select_basic_cols(df_out)
+        base_df = res["taste_only_main"].head(5)
+        base_df = select_basic_cols(base_df)
+        records = df_to_records(base_df)
 
-        logger.info(f"Survey recommendation returned {len(df_out)} results")
+        logger.info(f"Survey recommendation returned {len(records)} results")
 
         return jsonify({
             "mode": res.get("mode", "survey"),
-            "recommendations": df_out.to_dict(orient="records"),
+            "recommendations": records,
         })
 
     except Exception as e:
-        logger.exception(f"Survey recommendation error: {str(e)}")
+        logger.exception("Survey recommendation error")
         return jsonify({"error": str(e), "recommendations": []}), 500
 
 
@@ -121,15 +130,16 @@ def api_recommend_survey():
 def api_whisky_sample():
     try:
         n = int(request.args.get("n", 9))
-        n = min(n, len(df))
+        n = min(max(n, 1), len(df))
         logger.info(f"Sample request: n={n}")
 
-        sample_raw = df.sample(n)
-        sample_df = select_basic_cols(sample_raw)
+        sample_df = df.sample(n)
+        sample_df = select_basic_cols(sample_df)
+        records = df_to_records(sample_df)
 
-        logger.info(f"Returning {len(sample_df)} sample whiskies")
+        logger.info(f"Returning {len(records)} sample whiskies")
 
-        return jsonify(sample_df.to_dict(orient="records"))
+        return jsonify(records)
 
     except Exception as e:
         logger.exception("Sample API error")
@@ -137,7 +147,7 @@ def api_whisky_sample():
 
 
 # ---------------------------------------------------------
-# 제품 기반 추천 API (라운드로빈 적용)
+# 제품 기반 추천 API
 # ---------------------------------------------------------
 @app.post("/api/recommend/products")
 def api_recommend_products():
@@ -160,20 +170,20 @@ def api_recommend_products():
             top_k_meta=20,
         )
 
-        # taste version 우선
         if "taste_based_main" in res:
-            df_out = res["taste_based_main"].head(5)
+            base_df = res["taste_based_main"].head(5)
         else:
-            df_out = res["meta_based_main"].head(5)
+            base_df = res["meta_based_main"].head(5)
 
-        df_out = select_basic_cols(df_out)
+        base_df = select_basic_cols(base_df)
+        records = df_to_records(base_df)
 
-        logger.info(f"Product recommendation returned {len(df_out)} results")
+        logger.info(f"Product recommendation returned {len(records)} results")
 
         return jsonify({
             "mode": res.get("mode", "product"),
             "input_products": res.get("input_products", []),
-            "recommendations": df_out.to_dict(orient="records"),
+            "recommendations": records,
         })
 
     except ValueError as e:
@@ -183,7 +193,7 @@ def api_recommend_products():
         ), 404
 
     except Exception as e:
-        logger.exception(f"Product recommendation error: {str(e)}")
+        logger.exception("Product recommendation error")
         return jsonify({"error": str(e), "recommendations": []}), 500
 
 
