@@ -182,6 +182,11 @@
         grid-template-columns: 1fr;
       }
     }
+    .title-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
   </style>
 </head>
 <body>
@@ -192,9 +197,9 @@
   </p>
 
   <div class="layout-two">
-    <!-- === 왼쪽: 취향 기반 추천 === -->
+    <!-- === 왼쪽: 취향 기반 입력 === -->
     <section class="section" id="taste-section">
-      <h2>1. 취향 기반 추천</h2>
+      <h2>1. 취향 기반 입력</h2>
       <p class="hint">
         각 축에서 가장 가까운 느낌을 골라주세요. (기본값 : medium-round-non-balanced)
       </p>
@@ -279,44 +284,42 @@
         </div>
       </div>
 
-      <div class="btn-row">
-        <button class="btn btn-primary" id="btn-taste-recommend">
-          취향에 맞는 위스키 추천 받기 (Top 5)
-        </button>
-      </div>
-
       <div id="taste-results" class="grid"></div>
       <p id="taste-no-results" class="no-result" style="display:none;">
         조건에 맞는 위스키를 찾지 못했어요.
       </p>
     </section>
 
-    <!-- === 오른쪽: 제품 기반 추천 === -->
+    <!-- === 오른쪽: 제품 선택 + 공통 버튼 === -->
     <section class="section" id="product-section">
-      <h2>2. 제품 기반 추천</h2>
+      <h2>2. 제품 기반 입력 (선택)</h2>
       <p class="hint">
         아래에서 마음에 드는 위스키를 여러 개 고르면 (최대 5개),<br>
-        그 제품들의 평균 스타일과 비슷한 위스키를 추천해 줄게요.
+        그 제품들의 평균 스타일과 비슷한 위스키를 함께 추천해 줄게요.
       </p>
 
       <div class="btn-row">
         <button class="btn btn-secondary" id="btn-refresh-sample">
           다른 위스키 보기 (랜덤 9개)
         </button>
-        <button class="btn btn-primary" id="btn-product-recommend">
-          선택한 위스키와 비슷한 추천 받기 (Top 5)
-        </button>
       </div>
 
       <div id="product-sample" class="grid"></div>
       <p class="small">
-        ※ 카드를 클릭해서 기준이 될 위스키를 선택해 주세요. (0개 ~ 최대 5개 선택 가능)
+        ※ 카드를 클릭해서 기준이 될 위스키를 선택해 주세요. (0개 ~ 최대 5개 선택 가능)<br>
+        ※ 선택하지 않으면, 왼쪽 “취향 입력” 기준으로만 추천이 나옵니다.
       </p>
 
-      <h3>추천 결과</h3>
+      <div class="title-row">
+        <h3>추천 결과</h3>
+        <button class="btn btn-primary" id="btn-run-all">
+          추천 결과 보기 (Top 5)
+        </button>
+      </div>
+
       <div id="product-results" class="grid"></div>
       <p id="product-no-results" class="no-result" style="display:none;">
-        추천할 위스키를 찾지 못했어요.
+        제품 기반으로 추천할 위스키를 찾지 못했어요.
       </p>
     </section>
   </div>
@@ -342,7 +345,7 @@
         card.className = "card";
 
         const price = item["price(£)"] != null ? item["price(£)"] : item["price"];
-        const abv = item["alcohol(%)"];  // 🔸 컬럼명 변경 반영
+        const abv = item["alcohol(%)"];
         const flavour = [
           item["style_body"],
           item["style_richness"],
@@ -447,7 +450,7 @@
 
         const price = item["price(£)"] != null ? item["price(£)"] : item["price"];
         const priceText = price != null ? "약 £" + Number(price).toFixed(0) : "";
-        const abv = item["alcohol(%)"]; // 🔸 여기서도 alcohol(%) 사용
+        const abv = item["alcohol(%)"];
         const abvText = abv != null ? " · " + abv + "% ABV" : "";
 
         card.innerHTML =
@@ -481,8 +484,14 @@
     // ===============================================================
     // 3) 제품 기반 추천: /api/recommend/products
     // ===============================================================
-    async function recommendFromProductApi() {
+    async function recommendFromProductApi(skipIfEmpty) {
       if (productList.length === 0) {
+        // 버튼 하나로 돌릴 때는, 선택 안 했으면 조용히 스킵
+        if (skipIfEmpty) {
+          document.getElementById("product-no-results").style.display = "none";
+          document.getElementById("product-results").innerHTML = "";
+          return;
+        }
         alert("기준이 될 위스키를 최소 1개 이상 선택해 주세요. (최대 5개)");
         return;
       }
@@ -518,16 +527,20 @@
     }
 
     // ===============================================================
-    // 4) 버튼 연결 + 첫 샘플 호출
+    // 4) 공통 버튼: 둘 다 한 번에 실행
     // ===============================================================
-    document.getElementById("btn-taste-recommend")
-      .addEventListener("click", recommendFromTasteApi);
+    async function runUnifiedRecommend() {
+      // 1) 항상 취향 기반 추천
+      await recommendFromTasteApi();
+      // 2) 제품이 선택돼 있으면 제품 기반도 실행 (선택 없으면 조용히 스킵)
+      await recommendFromProductApi(true);
+    }
 
     document.getElementById("btn-refresh-sample")
       .addEventListener("click", refreshSampleFromApi);
 
-    document.getElementById("btn-product-recommend")
-      .addEventListener("click", recommendFromProductApi);
+    document.getElementById("btn-run-all")
+      .addEventListener("click", runUnifiedRecommend);
 
     // 페이지 로드 시 샘플 호출
     refreshSampleFromApi();
