@@ -44,19 +44,31 @@ except Exception as e:
     logger.error(f"Failed to initialize recommender: {str(e)}")
     raise
 
-# 공통 출력 컬럼
+# 공통 출력 컬럼 (있으면 쓰고, 없으면 자동으로 제외)
 BASIC_COLS = [
     "name", "country", "region", "whisky_type",
     "price(£)", "alcohol(%)",
     "style_body", "style_richness", "style_smoke", "style_sweetness",
 ]
 
+
+def select_basic_cols(df_like: pd.DataFrame) -> pd.DataFrame:
+    """
+    BASIC_COLS 중에서 실제로 df_like에 존재하는 컬럼만 선택해서 반환.
+    (어떤 컬럼이 없다고 해서 KeyError가 나지 않도록 방지)
+    """
+    cols = [c for c in BASIC_COLS if c in df_like.columns]
+    return df_like[cols]
+
+
 # ---------------------------------------------------------
 # 메인 페이지
 # ---------------------------------------------------------
 @app.route("/")
 def index():
+    # templates/index.html 이 있어야 합니다.
     return render_template("index.html")
+
 
 # ---------------------------------------------------------
 # 설문 기반 추천 API
@@ -83,17 +95,24 @@ def api_recommend_survey():
             top_k_meta=10,
         )
 
-        df_out = res["taste_only_main"].head(5)[BASIC_COLS]
+        # taste_only_main 이 없으면 에러 방지
+        if "taste_only_main" not in res:
+            raise ValueError("recommend 결과에 'taste_only_main' 키가 없습니다.")
+
+        df_out = res["taste_only_main"].head(5)
+        df_out = select_basic_cols(df_out)
+
         logger.info(f"Survey recommendation returned {len(df_out)} results")
 
         return jsonify({
-            "mode": res["mode"],
+            "mode": res.get("mode", "survey"),
             "recommendations": df_out.to_dict(orient="records"),
         })
 
     except Exception as e:
-        logger.error(f"Survey recommendation error: {str(e)}")
+        logger.exception(f"Survey recommendation error: {str(e)}")
         return jsonify({"error": str(e), "recommendations": []}), 500
+
 
 # ---------------------------------------------------------
 # 랜덤 위스키 샘플 제공 API
@@ -102,17 +121,20 @@ def api_recommend_survey():
 def api_whisky_sample():
     try:
         n = int(request.args.get("n", 9))
-        n = min(n, len(df))  # 데이터보다 많이 요청하지 않도록
+        n = min(max(n, 1), len(df))  # 1 이상, 전체 개수 이하
         logger.info(f"Sample request: n={n}")
 
-        sample_df = df.sample(n)[BASIC_COLS]
+        sample_df = df.sample(n, random_state=None)
+        sample_df = select_basic_cols(sample_df)
+
         logger.info(f"Returning {len(sample_df)} sample whiskies")
 
         return jsonify(sample_df.to_dict(orient="records"))
 
     except Exception as e:
-        logger.error(f"Sample API error: {str(e)}")
+        logger.exception(f"Sample API error: {str(e)}")
         return jsonify({"error": str(e)}), 500
+
 
 # ---------------------------------------------------------
 # 제품 기반 추천 API (라운드로빈 적용)
@@ -144,22 +166,34 @@ def api_recommend_products():
         else:
             df_out = res["meta_based_main"].head(5)
 
-        df_out = df_out[BASIC_COLS]
+        df_out = select_basic_cols(df_out)
+
         logger.info(f"Product recommendation returned {len(df_out)} results")
 
         return jsonify({
-            "mode": res["mode"],
+            "mode": res.get("mode", "product"),
             "input_products": res.get("input_products", []),
             "recommendations": df_out.to_dict(orient="records"),
         })
 
     except ValueError as e:
         logger.error(f"Product not found error: {str(e)}")
-        return jsonify({"error": f"제품을 찾을 수 없습니다: {str(e)}", "recommendations": []}), 404
+        return jsonify(
+            {"error": f"제품을 찾을 수 없습니다: {str(e)}", "recommendations": []}
+        ), 404
 
     except Exception as e:
-        logger.error(f"Product recommendation error: {str(e)}")
+        logger.exception(f"Product recommendation error: {str(e)}")
         return jsonify({"error": str(e), "recommendations": []}), 500
+
+
+# ---------------------------------------------------------
+# 헬스체크 (Render용)
+# ---------------------------------------------------------
+@app.get("/health")
+def health():
+    return "ok", 200
+
 
 # ---------------------------------------------------------
 # 로컬 실행용
