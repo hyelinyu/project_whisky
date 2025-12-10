@@ -49,6 +49,7 @@ BASIC_COLS = [
     "name", "country", "region", "whisky_type",
     "price(£)", "alcohol(%)",
     "style_body", "style_richness", "style_smoke", "style_sweetness",
+    "body_tag", "richness_tag", "smoke_tag", "sweetness_tag",
 ]
 
 
