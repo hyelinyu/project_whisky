@@ -159,7 +159,26 @@
             <div><span class="muted">Age:</span> {{ item.age if item.age is not none else "—" }}</div>
             <div><span class="muted">Vintage:</span> {{ item.vintage if item.vintage is not none else "—" }}</div>
             <div><span class="muted">Price(£):</span> {{ item["price(£)"] if item["price(£)"] is not none else "—" }}</div>
-            <div><span class="muted">ABV:</span> {{ item.abv if item.abv is not none else "—" }}</div>
+
+            <div>
+              <span class="muted">Alcohol(%):</span>
+              {{ item["alcohol(%)"] if item["alcohol(%)"] is not none else "—" }}
+            </div>
+
+            {% if item.flavour_pattern %}
+              <div><span class="muted">Pattern:</span> {{ item.flavour_pattern }}</div>
+            {% endif %}
+
+            {% if item.family_combo %}
+              <div>
+                <span class="muted">Family combo:</span>
+                {% if item.family_combo is string %}
+                  {{ item.family_combo }}
+                {% else %}
+                  {{ item.family_combo|join(", ") }}
+                {% endif %}
+              </div>
+            {% endif %}
           </div>
 
           <hr class="my-2" />
@@ -207,6 +226,26 @@
             <div><span class="muted">Age:</span> {{ item.age if item.age is not none else "—" }}</div>
             <div><span class="muted">Vintage:</span> {{ item.vintage if item.vintage is not none else "—" }}</div>
             <div><span class="muted">Price(£):</span> {{ item["price(£)"] if item["price(£)"] is not none else "—" }}</div>
+
+            <div>
+              <span class="muted">Alcohol(%):</span>
+              {{ item["alcohol(%)"] if item["alcohol(%)"] is not none else "—" }}
+            </div>
+
+            {% if item.flavour_pattern %}
+              <div><span class="muted">Pattern:</span> {{ item.flavour_pattern }}</div>
+            {% endif %}
+
+            {% if item.family_combo %}
+              <div>
+                <span class="muted">Family combo:</span>
+                {% if item.family_combo is string %}
+                  {{ item.family_combo }}
+                {% else %}
+                  {{ item.family_combo|join(", ") }}
+                {% endif %}
+              </div>
+            {% endif %}
           </div>
 
           <hr class="my-2" />
@@ -230,11 +269,10 @@
     const status = document.getElementById(key + "_status");
     const valSpan = document.getElementById(key + "_val");
 
-    // 사용자가 움직이면 None 해제
+    // 슬라이더를 움직이면 자동으로 None 해제 + 값 반영
     hidden.value = range.value;
     hidden.dataset.isNone = "0";
     status.style.display = "none";
-    range.disabled = false;
     valSpan.textContent = range.value;
   }
 
@@ -247,11 +285,10 @@
     hidden.value = "";            // 서버에서는 "" -> None 처리
     hidden.dataset.isNone = "1";
     status.style.display = "inline";
-    range.disabled = true;        // None이면 슬라이더 잠금
+    // ✅ 슬라이더는 비활성화하지 않음 (여기가 핵심)
     valSpan.textContent = "None";
   }
 
-  // 초기 렌더링: 서버가 지정한 none_keys만 None 처리. (초기 GET에서 슬라이더 먹통 방지)
   window.addEventListener("DOMContentLoaded", () => {
     const keys = ["style_body","style_richness","style_smoke","style_sweetness"];
     keys.forEach((k) => {
@@ -264,17 +301,24 @@
 
       if (isNone) {
         status.style.display = "inline";
-        range.disabled = true;
         valSpan.textContent = "None";
+        // ✅ None이어도 슬라이더는 살아있어야 함
+        // (사용자가 움직이면 syncRange가 None을 풀어줌)
       } else {
-        // hidden이 비어있으면(초기 상태) range value로 채워서 추천이 안 나오는 문제 방지
+        // hidden이 비어있으면(초기) range값으로 채움
         if (!hidden.value) hidden.value = range.value;
-        range.disabled = false;
         valSpan.textContent = range.value;
       }
+
+      // 초기 로딩 후에도 움직이면 바로 sync되게(안전장치)
+      range.addEventListener("input", () => syncRange(k));
+      range.addEventListener("change", () => syncRange(k));
     });
   });
 </script>
+
+</body>
+</html>
 
 </body>
 </html>
