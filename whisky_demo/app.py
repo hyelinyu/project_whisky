@@ -43,10 +43,6 @@ def chunk_page(items: List[Dict[str, Any]], page: int, per_page: int = 7) -> Tup
 
 
 def df_to_cards(df: pd.DataFrame) -> List[Dict[str, Any]]:
-    """
-    카드 표시용으로 필요한 컬럼만 뽑아서 dict 리스트로 변환.
-    (데이터셋 컬럼이 조금 달라도 안전하게 동작하도록 get 사용)
-    """
     if df is None or df.empty:
         return []
 
@@ -60,7 +56,9 @@ def df_to_cards(df: pd.DataFrame) -> List[Dict[str, Any]]:
         "bottler_group",
         "cask_group",
         "price(£)",
-        "abv",
+        "alcohol(%)",          
+        "flavour_pattern",    
+        "family_combo",       
         "final_score",
         "taste_distance",
         "meta_distance",
