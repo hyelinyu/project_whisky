@@ -2,11 +2,11 @@ from __future__ import annotations
 
 import os
 import math
+from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
 import pandas as pd
 from flask import Flask, render_template, request, redirect, url_for, session
-
 
 from recommender_model import WhiskyRecommender
 
@@ -61,9 +61,9 @@ def df_to_cards(df: pd.DataFrame) -> List[Dict[str, Any]]:
         "style_missing",
     ]
 
-    out = []
+    out: List[Dict[str, Any]] = []
     for _, row in df.iterrows():
-        item = {}
+        item: Dict[str, Any] = {}
         for c in cols:
             item[c] = row[c] if c in df.columns else None
         out.append(item)
@@ -75,25 +75,36 @@ def build_app() -> Flask:
     app.secret_key = os.environ.get("FLASK_SECRET_KEY", "dev-secret-key-change-me")
 
     # ----------------------------
-    # 1) 데이터 로드 (경로는 너 환경에 맞게 수정)
+    # 1) 데이터 로드 (Render/로컬 공통: repo 상대경로)
     # ----------------------------
-    # 예: CSV 파일 경로를 환경변수로 받거나 하드코딩
-    DATA_PATH = os.environ.get("WHISKY_DATA_PATH", "/content/drive/MyDrive/week_hands_on_project5/whiskey/data/whisky_master.csv")
-    df = pd.read_csv(DATA_PATH)
+    base_dir = Path(__file__).resolve().parent
+
+    # 환경변수로 경로를 주면 그걸 우선 사용 (선택)
+    env_path = os.environ.get("WHISKY_DATA_PATH")
+
+    if env_path:
+        data_path = Path(env_path)
+        if not data_path.is_absolute():
+            data_path = (base_dir / data_path).resolve()
+    else:
+        data_path = base_dir / "data" / "whisky_recommendation.csv"
+
+    if not data_path.exists():
+        raise FileNotFoundError(f"Data file not found: {data_path}")
+
+    df = pd.read_csv(data_path)
 
     # ✅ 모델 생성
     recommender = WhiskyRecommender(df)
 
     # ✅ family 후보(14개) 자동 생성: *_family 컬럼에서 prefix 추출
-    family_options = [c.replace("_family", "") for c in recommender.family_cols]
-    family_options = sorted(family_options)
+    family_options = sorted([c.replace("_family", "") for c in recommender.family_cols])
 
     # ----------------------------
     # Routes
     # ----------------------------
     @app.route("/", methods=["GET"])
     def index():
-        # 첫 화면(입력 UI만)
         return render_template(
             "index.html",
             family_options=family_options,
@@ -115,31 +126,25 @@ def build_app() -> Flask:
 
     @app.route("/recommend", methods=["POST", "GET"])
     def recommend():
-        """
-        - POST: 추천 생성 + 결과를 session에 저장 후 GET로 리다이렉트
-        - GET: session 결과를 읽어서 페이지네이션해 렌더
-        """
         if request.method == "POST":
             style_body = to_float_or_none(request.form.get("style_body"))
             style_richness = to_float_or_none(request.form.get("style_richness"))
             style_smoke = to_float_or_none(request.form.get("style_smoke"))
             style_sweetness = to_float_or_none(request.form.get("style_sweetness"))
 
-            selected_families = request.form.getlist("families")  # 체크된 값들
+            selected_families = request.form.getlist("families")
 
-            # ✅ 추천 실행
             out = recommender.recommend_from_survey(
                 style_body=style_body,
                 style_richness=style_richness,
                 style_smoke=style_smoke,
                 style_sweetness=style_sweetness,
                 selected_families=selected_families,
-                final_k=60,          # 내부 후보에서 최종 60까지 만들고
-                top_k_rare=60,       # 희귀도 최대 60까지 받아둔 뒤
-                random_state=42,     # 데모는 고정 시드 추천(원하면 None)
+                final_k=60,
+                top_k_rare=60,
+                random_state=None,
             )
 
-            # ✅ 메인 추천은 final_candidates 기준으로 보여주기
             main_df = out.get("final_candidates", pd.DataFrame())
             rare_df = out.get("rare", {}).get("rare_personalized_by_meta", pd.DataFrame())
 
@@ -155,14 +160,16 @@ def build_app() -> Flask:
 
             return redirect(url_for("recommend", main_page=1, rare_page=1))
 
-        # GET (페이지 이동)
-        input_state = session.get("input_state", {
-            "style_body": None,
-            "style_richness": None,
-            "style_smoke": None,
-            "style_sweetness": None,
-            "selected_families": [],
-        })
+        input_state = session.get(
+            "input_state",
+            {
+                "style_body": None,
+                "style_richness": None,
+                "style_smoke": None,
+                "style_sweetness": None,
+                "selected_families": [],
+            },
+        )
         main_cards_all = session.get("main_cards", [])
         rare_cards_all = session.get("rare_cards", [])
 
@@ -191,5 +198,4 @@ def build_app() -> Flask:
 app = build_app()
 
 if __name__ == "__main__":
-    # Colab/로컬에 맞게 host/port 조절
     app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)), debug=True)
