@@ -17,6 +17,8 @@ class WhiskyRecommender:
     - 희귀 제품군은 고정된 규칙으로 정의한다. (rare pool)
     - 고객의 meta 취향(meta_center)에 따라 rare pool 안에서만 개인화 추천을 별도로 제공한다.
     - 메인 추천 결과와는 "별개의 작업"으로 결과 dict에 따로 붙인다.
+
+  
     """
 
     # --------------------------------------------------------- #
@@ -53,6 +55,13 @@ class WhiskyRecommender:
     # TASTE SPACE (FA)
     # --------------------------------------------------------- #
     def _build_taste_space(self, n_neighbors: int):
+
+        # ✅ 항상 컬럼 존재 보장
+        if "FA1" not in self.df.columns:
+            self.df["FA1"] = np.nan
+        if "FA2" not in self.df.columns:
+            self.df["FA2"] = np.nan
+
         if "style_missing" not in self.df.columns:
             raise ValueError("df에 'style_missing' 컬럼이 필요합니다.")
 
@@ -78,27 +87,35 @@ class WhiskyRecommender:
         fa.fit(X_std)
         scores = fa.transform(X_std)
 
+        # ✅ 방어 체크 (혹시라도 scores shape 이상하면 바로 터뜨리기)
+        if scores is None or scores.shape[1] < 2:
+            raise ValueError(
+                f"FA transform 결과가 이상합니다. scores shape={None if scores is None else scores.shape}"
+            )
+
         df_taste_raw["FA1"] = scores[:, 0]
         df_taste_raw["FA2"] = scores[:, 1]
 
-        self.df["FA1"] = np.nan
-        self.df["FA2"] = np.nan
+        # self.df에 반영
         self.df.loc[df_taste_raw.index, ["FA1", "FA2"]] = df_taste_raw[["FA1", "FA2"]]
 
         self.df_taste = df_taste_raw
         self.scaler_taste = scaler
         self.fa_model = fa
 
-        X_taste = df_taste_raw[["FA1", "FA2"]].values
-        n_neighbors = min(n_neighbors, len(df_taste_raw))
+        # ✅ 여기서도 혹시 없으면 명확히 에러
+        if not set(["FA1", "FA2"]).issubset(self.df_taste.columns):
+            raise ValueError("df_taste_raw에 FA1/FA2 생성이 되지 않았습니다.")
+
+        X_taste = self.df_taste[["FA1", "FA2"]].values
+        n_neighbors = min(n_neighbors, len(self.df_taste))
 
         knn = NearestNeighbors(n_neighbors=n_neighbors, metric="euclidean")
         knn.fit(X_taste)
 
         self.knn_taste = knn
-        self._taste_index = df_taste_raw.index.to_numpy()
+        self._taste_index = self.df_taste.index.to_numpy()
 
-        # partial-style cache
         self._Z_style = X_std
         self._style_means_ = scaler.mean_.copy()
         self._style_scales_ = scaler.scale_.copy()
@@ -276,18 +293,21 @@ class WhiskyRecommender:
         if provided.sum() == 0:
             return pd.DataFrame()
 
-        v = np.array([
-            style_body if style_body is not None else self._style_means_[0],
-            style_richness if style_richness is not None else self._style_means_[1],
-            style_smoke if style_smoke is not None else self._style_means_[2],
-            style_sweetness if style_sweetness is not None else self._style_means_[3],
-        ], dtype=float)
+        v = np.array(
+            [
+                style_body if style_body is not None else self._style_means_[0],
+                style_richness if style_richness is not None else self._style_means_[1],
+                style_smoke if style_smoke is not None else self._style_means_[2],
+                style_sweetness if style_sweetness is not None else self._style_means_[3],
+            ],
+            dtype=float,
+        )
 
         z_u = (v - self._style_means_) / self._style_scales_
         Z = self._Z_style
 
         diff = Z[:, provided] - z_u[provided]
-        dists = np.sqrt((diff ** 2).sum(axis=1))
+        dists = np.sqrt((diff**2).sum(axis=1))
 
         n = min(top_k, len(self.df_taste))
         top_idx = np.argpartition(dists, n - 1)[:n]
@@ -313,11 +333,7 @@ class WhiskyRecommender:
         has_bdec = df.get("has_bottling_decade", pd.Series(0, index=idx)).fillna(0)
         bdec = df.get("bottling_decade", pd.Series(np.nan, index=idx))
 
-        special_mask = (
-            ((is_vintage == 1) & (vintage <= 1990)) |
-            (age >= 20) |
-            ((has_bdec == 1) & (bdec <= 1980))
-        )
+        special_mask = (((is_vintage == 1) & (vintage <= 1990)) | (age >= 20) | ((has_bdec == 1) & (bdec <= 1980)))
 
         return df[~special_mask], df[special_mask]
 
@@ -341,11 +357,7 @@ class WhiskyRecommender:
         has_bdec = df.get("has_bottling_decade", 0).fillna(0)
         bdec = df.get("bottling_decade", np.nan)
 
-        rare_mask = (
-            ((is_vintage == 1) & (vintage <= 1990)) |
-            (age >= 20) |
-            ((has_bdec == 1) & (bdec <= 1980))
-        )
+        rare_mask = (((is_vintage == 1) & (vintage <= 1990)) | (age >= 20) | ((has_bdec == 1) & (bdec <= 1980)))
 
         return rare_mask.fillna(False)
 
@@ -384,11 +396,9 @@ class WhiskyRecommender:
             return pd.DataFrame()
 
         # meta distance를 "전체 벡터 거리"로 직접 계산 (희귀만 필터)
-        # (KNN로 뽑고 필터하면 희귀가 적을 때 누락될 수 있어서 직접 계산이 안전)
         X = self.X_meta
         d = np.linalg.norm(X - meta_center.reshape(1, -1), axis=1)
 
-        # 희귀만 남기고 top_k
         d_rare = d[rare_mask.values]
         idx_rare = self._meta_index[rare_mask.values]
 
@@ -523,25 +533,25 @@ class WhiskyRecommender:
                 taste_df = self._knn_taste_point(user_factor, top_k_taste).reset_index(drop=False)
             else:
                 taste_df = self._taste_candidates_from_partial_style(
-                    style_body=b, style_richness=r, style_smoke=s, style_sweetness=sw,
-                    top_k=top_k_taste
+                    style_body=b,
+                    style_richness=r,
+                    style_smoke=s,
+                    style_sweetness=sw,
+                    top_k=top_k_taste,
                 )
 
             if taste_df is None or taste_df.empty:
                 continue
 
+            # family_match 계산 (가중치용)  
             taste_df = self._add_family_match_score(taste_df, selected_families)
-            taste_df_fam = taste_df[taste_df["family_match"] > 0].copy() if selected_families else taste_df.copy()
 
-            # 2) seed 선택
-            if taste_df_fam.empty:
-                seed_df = taste_df.head(seed_k).copy()
-            else:
-                seed_df = taste_df_fam.sort_values(
-                    by=["family_match", "taste_distance"],
-                    ascending=[False, True],
-                    na_position="last",
-                ).head(seed_k).copy()
+            # 2) seed 선택 (전체 taste_df에서 뽑되 family_match 우선)
+            seed_df = taste_df.sort_values(
+                by=["family_match", "taste_distance"],
+                ascending=[False, True],
+                na_position="last",
+            ).head(seed_k).copy()
 
             all_seeds.append(seed_df)
 
@@ -563,8 +573,13 @@ class WhiskyRecommender:
                 meta_df = self._knn_meta_point(meta_center, top_k_meta).reset_index(drop=False)
                 meta_df = self._add_family_match_score(meta_df, selected_families)
 
-            # 4) 후보 합치기
-            cand = pd.concat([taste_df, meta_df], axis=0, ignore_index=True)
+            # 4) 후보 만들기: ✅ meta_df 중심 (최종은 meta에서 뽑히도록)
+            if meta_df is not None and not meta_df.empty:
+                taste_back = taste_df.head(max(10, seed_k)).copy()  # 보조로 조금만
+                cand = pd.concat([meta_df, taste_back], axis=0, ignore_index=True)
+            else:
+                cand = taste_df.copy()
+
             if cand.empty:
                 continue
 
@@ -631,7 +646,6 @@ class WhiskyRecommender:
         if meta_center_last is not None:
             rare_personalized = self._rare_knn_by_meta(meta_center_last, top_k=top_k_rare)
         else:
-            # meta_center가 없으면 "희귀군 전체 중 상위"만
             rare_personalized = rare_pool.head(top_k_rare).copy()
 
         return {
@@ -658,6 +672,6 @@ class WhiskyRecommender:
                 "rare_rule_description": (
                     "Rare pool은 고정 규칙으로 정의됨. "
                     "고객 meta_center 기준으로 rare pool 내부에서만 거리 계산하여 개인화 추천."
-                )
-            }
+                ),
+            },
         }
