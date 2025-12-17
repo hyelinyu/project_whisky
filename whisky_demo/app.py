@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import os
 import math
+import uuid
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
@@ -9,6 +10,13 @@ import pandas as pd
 from flask import Flask, render_template, request, redirect, url_for, session
 
 from recommender_model import WhiskyRecommender
+
+
+# ----------------------------
+# In-memory cache (주의: 단일 프로세스/단일 인스턴스 데모용)
+# Render 같은 멀티 인스턴스 환경이면 Redis 같은 외부 스토어 권장
+# ----------------------------
+RESULTS_CACHE: Dict[str, Dict[str, Any]] = {}  # rid -> {"main_cards": [...], "rare_cards": [...]}
 
 
 def to_float_or_none(x: str) -> Optional[float]:
@@ -75,11 +83,9 @@ def build_app() -> Flask:
     app.secret_key = os.environ.get("FLASK_SECRET_KEY", "dev-secret-key-change-me")
 
     # ----------------------------
-    # 1) 데이터 로드 (Render/로컬 공통: repo 상대경로)
+    # 1) 데이터 로드
     # ----------------------------
     base_dir = Path(__file__).resolve().parent
-
-    # 환경변수로 경로를 주면 그걸 우선 사용 (선택)
     env_path = os.environ.get("WHISKY_DATA_PATH")
 
     if env_path:
@@ -97,24 +103,33 @@ def build_app() -> Flask:
     # ✅ 모델 생성
     recommender = WhiskyRecommender(df)
 
-    # ✅ family 후보(14개) 자동 생성: *_family 컬럼에서 prefix 추출
+    # ✅ family 후보 자동 생성
     family_options = sorted([c.replace("_family", "") for c in recommender.family_cols])
+
+    STYLE_KEYS = ["style_body", "style_richness", "style_smoke", "style_sweetness"]
 
     # ----------------------------
     # Routes
     # ----------------------------
     @app.route("/", methods=["GET"])
     def index():
+        # 초기 화면에서는 슬라이더가 먹통이 되면 안 되니까 none_keys는 비워둠
+        input_state = {
+            "style_body": None,
+            "style_richness": None,
+            "style_smoke": None,
+            "style_sweetness": None,
+            "selected_families": [],
+            "none_keys": [],  # ✅ 중요
+        }
+
+        # 결과 캐시도 초기화(선택)
+        session.pop("rid", None)
+
         return render_template(
             "index.html",
             family_options=family_options,
-            input_state={
-                "style_body": None,
-                "style_richness": None,
-                "style_smoke": None,
-                "style_sweetness": None,
-                "selected_families": [],
-            },
+            input_state=input_state,
             main_cards=[],
             rare_cards=[],
             main_page=1,
@@ -127,6 +142,8 @@ def build_app() -> Flask:
     @app.route("/recommend", methods=["POST", "GET"])
     def recommend():
         if request.method == "POST":
+            # ---- 1) 폼 파싱 ----
+            # hidden input이 ""이면 None
             style_body = to_float_or_none(request.form.get("style_body"))
             style_richness = to_float_or_none(request.form.get("style_richness"))
             style_smoke = to_float_or_none(request.form.get("style_smoke"))
@@ -134,6 +151,19 @@ def build_app() -> Flask:
 
             selected_families = request.form.getlist("families")
 
+            # ✅ none_keys 계산 (템플릿에서 None 버튼 상태 유지용)
+            none_keys: List[str] = []
+            raw_map = {
+                "style_body": request.form.get("style_body"),
+                "style_richness": request.form.get("style_richness"),
+                "style_smoke": request.form.get("style_smoke"),
+                "style_sweetness": request.form.get("style_sweetness"),
+            }
+            for k, raw in raw_map.items():
+                if raw is None or str(raw).strip() == "":
+                    none_keys.append(k)
+
+            # ---- 2) 추천 실행 ----
             out = recommender.recommend_from_survey(
                 style_body=style_body,
                 style_richness=style_richness,
@@ -148,18 +178,27 @@ def build_app() -> Flask:
             main_df = out.get("final_candidates", pd.DataFrame())
             rare_df = out.get("rare", {}).get("rare_personalized_by_meta", pd.DataFrame())
 
+            # ---- 3) 세션에는 "작은 값"만 저장 ----
+            rid = uuid.uuid4().hex
+            session["rid"] = rid
             session["input_state"] = {
                 "style_body": style_body,
                 "style_richness": style_richness,
                 "style_smoke": style_smoke,
                 "style_sweetness": style_sweetness,
                 "selected_families": selected_families,
+                "none_keys": none_keys,  # ✅ 중요
             }
-            session["main_cards"] = df_to_cards(main_df)
-            session["rare_cards"] = df_to_cards(rare_df)
+
+            # ---- 4) 큰 결과는 서버 메모리 캐시에 저장 ----
+            RESULTS_CACHE[rid] = {
+                "main_cards_all": df_to_cards(main_df),
+                "rare_cards_all": df_to_cards(rare_df),
+            }
 
             return redirect(url_for("recommend", main_page=1, rare_page=1))
 
+        # ---------------- GET (페이지네이션 표시) ----------------
         input_state = session.get(
             "input_state",
             {
@@ -168,10 +207,14 @@ def build_app() -> Flask:
                 "style_smoke": None,
                 "style_sweetness": None,
                 "selected_families": [],
+                "none_keys": [],
             },
         )
-        main_cards_all = session.get("main_cards", [])
-        rare_cards_all = session.get("rare_cards", [])
+
+        rid = session.get("rid")
+        cache = RESULTS_CACHE.get(rid, {}) if rid else {}
+        main_cards_all = cache.get("main_cards_all", [])
+        rare_cards_all = cache.get("rare_cards_all", [])
 
         main_page = int(request.args.get("main_page", 1))
         rare_page = int(request.args.get("rare_page", 1))
