@@ -16,7 +16,7 @@ from recommender_model import WhiskyRecommender
 # In-memory cache (주의: 단일 프로세스/단일 인스턴스 데모용)
 # Render 같은 멀티 인스턴스 환경이면 Redis 같은 외부 스토어 권장
 # ----------------------------
-RESULTS_CACHE: Dict[str, Dict[str, Any]] = {}  # rid -> {"main_cards": [...], "rare_cards": [...]}
+RESULTS_CACHE: Dict[str, Dict[str, Any]] = {}  # rid -> {"main_cards_all": [...], "rare_cards_all": [...]}
 
 
 def to_float_or_none(x: str) -> Optional[float]:
@@ -43,8 +43,22 @@ def chunk_page(items: List[Dict[str, Any]], page: int, per_page: int = 7) -> Tup
 
 
 def df_to_cards(df: pd.DataFrame) -> List[Dict[str, Any]]:
+    """
+    카드 표시용 dict 리스트 변환.
+    - NaN -> None 정리 (템플릿에서 join/if 처리 중 500 방지)
+    - family_combo(tuple) -> list로 변환 (Jinja join 안전)
+    """
     if df is None or df.empty:
         return []
+
+    def clean(v: Any) -> Any:
+        # pandas/numpy NaN -> None
+        try:
+            if pd.isna(v):
+                return None
+        except Exception:
+            pass
+        return v
 
     cols = [
         "name",
@@ -56,9 +70,9 @@ def df_to_cards(df: pd.DataFrame) -> List[Dict[str, Any]]:
         "bottler_group",
         "cask_group",
         "price(£)",
-        "alcohol(%)",          
-        "flavour_pattern",    
-        "family_combo",       
+        "alcohol(%)",        # ✅ abv -> alcohol(%)
+        "flavour_pattern",   # ✅ 추가
+        "family_combo",      # ✅ 추가
         "final_score",
         "taste_distance",
         "meta_distance",
@@ -71,7 +85,18 @@ def df_to_cards(df: pd.DataFrame) -> List[Dict[str, Any]]:
     for _, row in df.iterrows():
         item: Dict[str, Any] = {}
         for c in cols:
-            item[c] = row[c] if c in df.columns else None
+            if c not in df.columns:
+                item[c] = None
+                continue
+
+            v = clean(row[c])
+
+            # family_combo가 tuple이면 list로 바꿔서 템플릿 join이 안전하게
+            if c == "family_combo" and isinstance(v, tuple):
+                v = list(v)
+
+            item[c] = v
+
         out.append(item)
     return out
 
@@ -104,14 +129,11 @@ def build_app() -> Flask:
     # ✅ family 후보 자동 생성
     family_options = sorted([c.replace("_family", "") for c in recommender.family_cols])
 
-    STYLE_KEYS = ["style_body", "style_richness", "style_smoke", "style_sweetness"]
-
     # ----------------------------
     # Routes
     # ----------------------------
     @app.route("/", methods=["GET"])
     def index():
-        # 초기 화면에서는 슬라이더가 먹통이 되면 안 되니까 none_keys는 비워둠
         input_state = {
             "style_body": None,
             "style_richness": None,
@@ -121,7 +143,6 @@ def build_app() -> Flask:
             "none_keys": [],  # ✅ 중요
         }
 
-        # 결과 캐시도 초기화(선택)
         session.pop("rid", None)
 
         return render_template(
@@ -141,7 +162,6 @@ def build_app() -> Flask:
     def recommend():
         if request.method == "POST":
             # ---- 1) 폼 파싱 ----
-            # hidden input이 ""이면 None
             style_body = to_float_or_none(request.form.get("style_body"))
             style_richness = to_float_or_none(request.form.get("style_richness"))
             style_smoke = to_float_or_none(request.form.get("style_smoke"))
@@ -149,7 +169,7 @@ def build_app() -> Flask:
 
             selected_families = request.form.getlist("families")
 
-            # ✅ none_keys 계산 (템플릿에서 None 버튼 상태 유지용)
+            # ✅ none_keys 계산
             none_keys: List[str] = []
             raw_map = {
                 "style_body": request.form.get("style_body"),
@@ -176,7 +196,7 @@ def build_app() -> Flask:
             main_df = out.get("final_candidates", pd.DataFrame())
             rare_df = out.get("rare", {}).get("rare_personalized_by_meta", pd.DataFrame())
 
-            # ---- 3) 세션에는 "작은 값"만 저장 ----
+            # ---- 3) 세션에는 작은 값만 ----
             rid = uuid.uuid4().hex
             session["rid"] = rid
             session["input_state"] = {
@@ -185,10 +205,10 @@ def build_app() -> Flask:
                 "style_smoke": style_smoke,
                 "style_sweetness": style_sweetness,
                 "selected_families": selected_families,
-                "none_keys": none_keys,  # ✅ 중요
+                "none_keys": none_keys,
             }
 
-            # ---- 4) 큰 결과는 서버 메모리 캐시에 저장 ----
+            # ---- 4) 큰 결과는 캐시에 ----
             RESULTS_CACHE[rid] = {
                 "main_cards_all": df_to_cards(main_df),
                 "rare_cards_all": df_to_cards(rare_df),
@@ -196,7 +216,7 @@ def build_app() -> Flask:
 
             return redirect(url_for("recommend", main_page=1, rare_page=1))
 
-        # ---------------- GET (페이지네이션 표시) ----------------
+        # ---------------- GET ----------------
         input_state = session.get(
             "input_state",
             {
