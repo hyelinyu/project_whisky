@@ -9,7 +9,7 @@ from flask import Flask, render_template, request, redirect, url_for, session
 
 # ✅ 너의 모델 파일 경로/클래스 import (환경에 맞게 수정)
 # recommender_model2.py가 같은 폴더에 있으면 아래처럼
-from recommender_model2 import WhiskyRecommender
+from recommender_model import WhiskyRecommender
 
 
 def to_float_or_none(x: str) -> Optional[float]:
