@@ -7,8 +7,7 @@ from typing import Any, Dict, List, Optional, Tuple
 import pandas as pd
 from flask import Flask, render_template, request, redirect, url_for, session
 
-# ✅ 너의 모델 파일 경로/클래스 import (환경에 맞게 수정)
-# recommender_model2.py가 같은 폴더에 있으면 아래처럼
+
 from recommender_model import WhiskyRecommender
 
 
@@ -140,7 +139,7 @@ def build_app() -> Flask:
                 random_state=42,     # 데모는 고정 시드 추천(원하면 None)
             )
 
-            # ✅ 메인 추천은 final_candidates 기준으로 보여주기(정렬 이미 되어있음)
+            # ✅ 메인 추천은 final_candidates 기준으로 보여주기
             main_df = out.get("final_candidates", pd.DataFrame())
             rare_df = out.get("rare", {}).get("rare_personalized_by_meta", pd.DataFrame())
 
