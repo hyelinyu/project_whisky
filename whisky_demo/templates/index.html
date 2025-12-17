@@ -39,7 +39,7 @@
   <div class="panel p-3 p-md-4 mb-4">
     <form method="POST" action="{{ url_for('recommend') }}">
       <div class="row g-3">
-        <!-- 스타일 슬라이더 4개 -->
+
         {% set sliders = [
           ("style_body", "Body"),
           ("style_richness", "Richness"),
@@ -47,38 +47,51 @@
           ("style_sweetness", "Sweetness")
         ] %}
 
+        {# None 상태를 서버에서 명시적으로 넘기기: input_state["none_keys"] = ["style_body", ...] #}
+        {% set none_keys = input_state.get("none_keys", []) if input_state is defined else [] %}
+
         {% for key, label in sliders %}
-        <div class="col-12 col-md-6">
-          <div class="d-flex align-items-center justify-content-between mb-1">
-            <div>
-              <div class="fw-bold">{{ label }}</div>
-              <div class="muted small">0 ~ 5</div>
+          {% set is_none = (key in none_keys) %}
+          {% set default_val = 2.5 %}
+          {% set current_val = input_state.get(key) if (input_state is defined and input_state.get(key) is not none) else default_val %}
+          <div class="col-12 col-md-6">
+            <div class="d-flex align-items-center justify-content-between mb-1">
+              <div>
+                <div class="fw-bold">{{ label }}</div>
+                <div class="muted small">0 ~ 5</div>
+              </div>
+              <div class="d-flex align-items-center gap-2">
+                <span id="{{ key }}_status" class="none-badge" style="display:none;">None</span>
+                <button type="button" class="btn btn-sm btn-outline-danger" onclick="setNone('{{ key }}')">None</button>
+              </div>
             </div>
-            <div class="d-flex align-items-center gap-2">
-              <span id="{{ key }}_status" class="none-badge" style="display:none;">None</span>
-              <button type="button" class="btn btn-sm btn-outline-danger" onclick="setNone('{{ key }}')">None</button>
+
+            <!-- 서버로 넘어가는 hidden input: None이면 빈 문자열, 아니면 숫자 -->
+            <input
+              type="hidden"
+              name="{{ key }}"
+              id="{{ key }}_hidden"
+              value="{% if is_none %}{% else %}{{ current_val }}{% endif %}"
+              data-is-none="{% if is_none %}1{% else %}0{% endif %}"
+            >
+
+            <!-- 사용자가 조작하는 range -->
+            <input
+              type="range"
+              class="form-range"
+              min="0" max="5" step="0.5"
+              id="{{ key }}_range"
+              value="{{ current_val }}"
+              oninput="syncRange('{{ key }}')"
+              onchange="syncRange('{{ key }}')"
+            />
+
+            <div class="d-flex justify-content-between small muted">
+              <span>0</span>
+              <span class="mono">value: <span id="{{ key }}_val"></span></span>
+              <span>5</span>
             </div>
           </div>
-
-          <!-- 실제로 서버로 넘어가는 hidden input (None이면 빈 문자열) -->
-          <input type="hidden" name="{{ key }}" id="{{ key }}_hidden" value="{{ input_state[key] if input_state[key] is not none else '' }}">
-
-          <!-- 사용자 조작용 range -->
-          <input
-            type="range"
-            class="form-range"
-            min="0" max="5" step="0.5"
-            id="{{ key }}_range"
-            value="{{ input_state[key] if input_state[key] is not none else 2.5 }}"
-            oninput="syncRange('{{ key }}')"
-          />
-
-          <div class="d-flex justify-content-between small muted">
-            <span>0</span>
-            <span class="mono">value: <span id="{{ key }}_val"></span></span>
-            <span>5</span>
-          </div>
-        </div>
         {% endfor %}
 
         <!-- family 선택 -->
@@ -95,7 +108,7 @@
                     name="families"
                     value="{{ fam }}"
                     id="fam_{{ fam }}"
-                    {% if fam in input_state.selected_families %}checked{% endif %}
+                    {% if input_state is defined and fam in input_state.selected_families %}checked{% endif %}
                   >
                   <label class="form-check-label" for="fam_{{ fam }}">{{ fam }}</label>
                 </div>
@@ -219,6 +232,7 @@
 
     // 사용자가 움직이면 None 해제
     hidden.value = range.value;
+    hidden.dataset.isNone = "0";
     status.style.display = "none";
     range.disabled = false;
     valSpan.textContent = range.value;
@@ -230,13 +244,14 @@
     const status = document.getElementById(key + "_status");
     const valSpan = document.getElementById(key + "_val");
 
-    hidden.value = "";          // 서버에서는 None으로 처리
+    hidden.value = "";            // 서버에서는 "" -> None 처리
+    hidden.dataset.isNone = "1";
     status.style.display = "inline";
-    range.disabled = true;      // UI상 None이면 슬라이더 잠금
+    range.disabled = true;        // None이면 슬라이더 잠금
     valSpan.textContent = "None";
   }
 
-  // 초기 렌더링 시 값 표시 + None 상태 반영
+  // 초기 렌더링: 서버가 지정한 none_keys만 None 처리. (초기 GET에서 슬라이더 먹통 방지)
   window.addEventListener("DOMContentLoaded", () => {
     const keys = ["style_body","style_richness","style_smoke","style_sweetness"];
     keys.forEach((k) => {
@@ -245,15 +260,17 @@
       const status = document.getElementById(k + "_status");
       const valSpan = document.getElementById(k + "_val");
 
-      if (!hidden.value) {
-        // None
+      const isNone = (hidden.dataset.isNone === "1");
+
+      if (isNone) {
         status.style.display = "inline";
         range.disabled = true;
         valSpan.textContent = "None";
       } else {
+        // hidden이 비어있으면(초기 상태) range value로 채워서 추천이 안 나오는 문제 방지
+        if (!hidden.value) hidden.value = range.value;
         range.disabled = false;
-        range.value = hidden.value;
-        valSpan.textContent = hidden.value;
+        valSpan.textContent = range.value;
       }
     });
   });
