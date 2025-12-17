@@ -188,8 +188,8 @@ def build_app() -> Flask:
                 style_smoke=style_smoke,
                 style_sweetness=style_sweetness,
                 selected_families=selected_families,
-                final_k=60,
-                top_k_rare=60,
+                final_k=21,
+                top_k_rare=50,
                 random_state=None,
             )
 
