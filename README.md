@@ -30,8 +30,6 @@ The original dataset used in this project is **not included in this repository**
 to respect the content ownership and usage policies of the source website  .
 
 Only the **analysis code** and **modeling pipeline** are shared here.
-If you wish to reproduce the results, please collect the data directly from the
-original source according to their Terms & Conditions.
 
 본 프로젝트에서 사용된 원본 데이터셋은 소스 웹사이트의 콘텐츠 소유권 및 이용 정책을 준수하기 위해
 이 저장소에 포함하지 않았습니다.
